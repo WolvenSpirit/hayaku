@@ -1,0 +1,27 @@
+api:
+  - handler:
+      path: "/"
+      public: true
+      methods:
+        get:
+          sql: ""
+  - handler:
+      path: "/users"
+      public: false
+      methods:
+        post:
+          sql: "insert (username,password) values ($1,$2)"
+        get:
+          sql: "select username, password from products"
+  - handler:
+      path: "/products"
+      public: true
+      methods:
+        post:
+          sql: "insert (name,price) values ($1,$2)"
+        get:
+          sql: "select name, price from products"
+        put:
+          sql: ""
+        delete:
+          sql: ""
