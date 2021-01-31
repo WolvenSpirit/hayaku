@@ -11,22 +11,46 @@ type Method struct {
 	POST   string
 	PUT    string
 	DELETE string
+	PATCH  string
 }
 
+type contentType struct {
+	URLEncoded string
+	Multipart  string
+	JSON       string
+}
 type ServerAPI struct {
 	API []API `yaml:"api"`
 }
 type Get struct {
-	SQL string `yaml:"sql"`
+	Public   bool   `yaml:"public"`
+	SQL      string `yaml:"sql"`
+	Resource []string
+	Headers  map[string]string
 }
 type Post struct {
-	SQL string `yaml:"sql"`
+	Public   bool   `yaml:"public"`
+	SQL      string `yaml:"sql"`
+	Resource []string
+	Headers  map[string]string
 }
 type Put struct {
-	SQL string `yaml:"sql"`
+	Public   bool   `yaml:"public"`
+	SQL      string `yaml:"sql"`
+	Resource []string
+	Headers  map[string]string
 }
 type Delete struct {
-	SQL string `yaml:"sql"`
+	Public   bool   `yaml:"public"`
+	SQL      string `yaml:"sql"`
+	Resource []string
+	Headers  map[string]string
+}
+type Patch struct {
+	Public   bool   `yaml:"public"`
+	SQL      string `yaml:"sql"`
+	Resource []string
+	Headers  map[string]string
 }
 type Methods struct {
 	Get    Get    `yaml:"get"`
@@ -36,7 +60,6 @@ type Methods struct {
 }
 type Handler struct {
 	Path    string  `yaml:"path"`
-	Public  bool    `yaml:"public"`
 	Methods Methods `yaml:"methods"`
 }
 type API struct {
@@ -60,6 +83,13 @@ var (
 		POST:   "POST",
 		PUT:    "PUT",
 		DELETE: "DELETE",
+		PATCH:  "PATCH",
+	}
+	// ContentType accepted
+	ContentType = contentType{
+		URLEncoded: "application/x-www-form-urlencoded",
+		Multipart:  "multipart/form-data",
+		JSON:       "application/json",
 	}
 )
 

@@ -7,21 +7,36 @@ api:
           sql: ""
   - handler:
       path: "/users"
-      public: false
       methods:
         post:
+          public: false
+          resource:
+            - "username"
+            - "password"
           sql: "insert (username,password) values ($1,$2)"
+          headers:
+            content-type: "application/json"
         get:
+          public: false
+          resource:
+            - "username"
+            - "password"
           sql: "select username, password from products"
   - handler:
       path: "/products"
-      public: true
       methods:
+        public: true
         post:
           sql: "insert (name,price) values ($1,$2)"
         get:
+          public: true
           sql: "select name, price from products"
         put:
+          public: true
           sql: ""
         delete:
+          public: true
+          sql: ""
+        patch:
+          public: true
           sql: ""

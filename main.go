@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"os/signal"
 
 	"github.com/WolvenSpirit/hayaku/database"
 	"github.com/WolvenSpirit/hayaku/server"
@@ -26,6 +28,8 @@ var (
 	Configuration = Config{}
 	// APIfile API definition file
 	APIfile string = "api.yaml"
+	// Development run
+	Development = false
 )
 
 func dontPanicBeHappy() {
@@ -39,10 +43,12 @@ func parseFlags() {
 		cfg string
 		db  string
 		api string
+		dev string
 	}{
 		cfg: "--cfg",
 		db:  "--db",
 		api: "--api",
+		dev: "--dev",
 	}
 	for k, arg := range os.Args {
 		switch arg {
@@ -52,6 +58,8 @@ func parseFlags() {
 			ConfigFile = os.Args[k+1]
 		case flags.db:
 			DatabaseFile = os.Args[k+1]
+		case flags.dev:
+			Development = true
 		}
 	}
 }
@@ -72,17 +80,25 @@ func populateStructFromYAML(data []byte, obj interface{}) {
 func init() {
 	parseFlags()
 	defer dontPanicBeHappy()
-	log.Println("Parsed configuration files:", os.Args[1:])
+	log.Println("Parsed configuration file arguments:", os.Args[1:])
 	populateStructFromYAML(readFile(ConfigFile), &Configuration)
 	populateStructFromYAML(readFile(DatabaseFile), &database.Config)
 	populateStructFromYAML(readFile(APIfile), &server.S.DefineAPI)
+	server.S.HTTPserver.Addr = fmt.Sprintf("%s:%s", Configuration.Host, Configuration.Port)
+	server.S.RegisterAPI()
+	database.ConnectPostgresql()
 }
 
 func main() {
-	log.Printf("Marshalled: \n%+v \n%+v \n%+v", Configuration, database.Config, server.S.DefineAPI)
-	server.S.HTTPserver.Addr = fmt.Sprintf("%s:%s", Configuration.Host, Configuration.Port)
-	server.S.RegisterAPI()
-	log.Println("Listening on ", server.S.HTTPserver.Addr)
-	err := server.S.HTTPserver.ListenAndServe()
-	panic(err)
+	database.Up()
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
+	log.Printf("Listening on [%s] Development run [%t]", server.S.HTTPserver.Addr, Development)
+	go func() {
+		log.Println(server.S.HTTPserver.ListenAndServe())
+	}()
+	<-sig
+	log.Println("Shutting down server.")
+	database.DB.Close()
+	server.S.HTTPserver.Shutdown(context.Background())
 }

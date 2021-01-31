@@ -1,0 +1,17 @@
+rdbms: postgresql # postgresql | mysql | sqlite
+host: localhost
+port: 5432
+database: hayaku
+user: postgres
+password: 
+sslmode: disable
+
+definition:
+  - table:
+      name: "users"
+      create: "create table users (id serial primary key not null, username text, password text, created timestamptz default NOW())"
+      delete: "drop table users"
+  - table:
+      name: "products"
+      create: "create table products (id serial primary key not null, name text, price numeric(9,2))"
+      delete: "drop table products"
