@@ -1,0 +1,11 @@
+name: "Build and test Hayaku"
+description: "Builds the project and executes the tests."
+author: "WolvenSpirit"
+
+runs:
+  using: "docker"
+  image: "Dockerfile"
+
+branding:
+  icon: "mic"
+  color: "purple"

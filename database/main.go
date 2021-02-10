@@ -69,6 +69,7 @@ var (
 	err    error
 )
 
+// ConnectPostgresql establishes connection to PostgreSQL rdbms
 func ConnectPostgresql() {
 	if Config.RDBMS != "postgresql" {
 		return
