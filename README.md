@@ -1,3 +1,5 @@
+[![Actions Status](https://github.com/WolvenSpirit/hayaku/workflows/Go/badge.svg)](https://github.com/WolvenSpirit/hayaku/actions)
+
 ### 早く 
 ###### hayaku
 ----------------
