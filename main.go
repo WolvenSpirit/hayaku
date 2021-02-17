@@ -86,7 +86,7 @@ func init() {
 	populateStructFromYAML(readFile(APIfile), &server.S.DefineAPI)
 	server.S.HTTPserver.Addr = fmt.Sprintf("%s:%s", Configuration.Host, Configuration.Port)
 	server.S.RegisterAPI()
-	database.ConnectPostgresql()
+	database.Connect()
 }
 
 func main() {

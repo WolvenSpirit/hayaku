@@ -3,15 +3,27 @@ host: localhost
 port: 5432
 database: hayaku
 user: postgres
-password: 
+password:
 sslmode: disable
 
 definition:
   - table:
       name: "users"
-      create: "create table users (id serial primary key not null, username text, password text, created timestamptz default NOW())"
+      create: "create table users (id serial primary key not null, username text, password text, created timestamp default NOW())"
       delete: "drop table users"
+      flavor: "postgresql"
   - table:
       name: "products"
       create: "create table products (id serial primary key not null, name text, price numeric(9,2))"
       delete: "drop table products"
+      flavor: "postgresql"
+  - table:
+      name: "users"
+      create: "create table if not exists `users`(`id` INTEGER primary key autoincrement, `username` text, `password` text, `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
+      delete: "drop table users"
+      flavor: "sqlite"
+  - table:
+      name: "products"
+      create: "create table if not exists `products`(`id` INTEGER primary key autoincrement, `name` text, `price` numeric(9,2))"
+      delete: "drop table products"
+      flavor: "sqlite"

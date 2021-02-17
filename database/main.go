@@ -2,25 +2,44 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+	"os"
 	"strings"
 
-	// database/sql driver
+	// database/sql drivers
+	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
+	_ "github.com/mattn/go-sqlite3"
+)
+
+const (
+	// POSTGRESQL driver
+	POSTGRESQL = "postgresql"
+	// MYSQL driver
+	MYSQL = "mysql"
+	// SQLITE driver
+	SQLITE          = "sqlite"
+	defaultDatabase = "hayaku_default_database"
 )
 
 // Up migrate up
 func Up() {
 	log.Println("Migrate up.")
+	if DB == nil {
+		os.Exit(3)
+	}
 	tx, err := DB.Begin()
 	if err != nil {
 		log.Println(err)
 	}
 	for _, v := range Config.Definition {
-		log.Printf("Creating %s table", v.Table.Name)
-		if _, err := tx.Exec(v.Table.Create); err != nil {
-			log.Println(err)
-			tx.Rollback()
+		if v.Table.Flavor == Config.RDBMS {
+			log.Printf("Creating %s table", v.Table.Name)
+			if _, err := tx.Exec(v.Table.Create); err != nil {
+				log.Println(err)
+				tx.Rollback()
+			}
 		}
 	}
 	tx.Commit()
@@ -33,9 +52,11 @@ func Down() {
 		log.Println(err)
 	}
 	for _, v := range Config.Definition {
-		if _, err := tx.Exec(v.Table.Delete); err != nil {
-			log.Println(err)
-			tx.Rollback()
+		if v.Table.Flavor == Config.RDBMS {
+			if _, err := tx.Exec(v.Table.Delete); err != nil {
+				log.Println(err)
+				tx.Rollback()
+			}
 		}
 	}
 	tx.Commit()
@@ -60,6 +81,7 @@ type Table struct {
 	Name   string `json:"name"`
 	Create string `json:"create"`
 	Delete string `json:"delete"`
+	Flavor string `json:"driver"`
 }
 
 // Config stores database configuration
@@ -69,22 +91,41 @@ var (
 	err    error
 )
 
-// ConnectPostgresql establishes connection to PostgreSQL rdbms
-func ConnectPostgresql() {
-	if Config.RDBMS != "postgresql" {
-		return
-	}
+// Connect establishes connection using the chosen driver
+func Connect() {
+	var dsn string
 	log.Printf(
-		`Connecting to [postgresql] Host[%s] Post[%s] Database[%s] User[%s] Sslmode[%s]`,
+		`Connecting to [%s] Host[%s] Post[%s] Database[%s] User[%s] Sslmode[%s] \n DSN[%s]`,
+		Config.RDBMS,
 		Config.Host,
 		Config.Port,
 		Config.Database,
 		Config.User,
 		Config.Sslmode,
+		dsn,
 	)
-	psqlConnectionURL := strings.Join([]string{"postgres://", Config.User, ":", Config.Password,
-		"@", Config.Host, ":", Config.Port, "/", Config.Database, "?sslmode=", Config.Sslmode}, "")
-	DB, err = sql.Open("postgres", psqlConnectionURL)
-	log.Printf("%+v", DB.Stats())
-	panic(err)
+	switch Config.RDBMS {
+	case POSTGRESQL:
+
+		dsn = strings.Join([]string{"postgres://", Config.User, ":", Config.Password,
+			"@", Config.Host, ":", Config.Port, "/", Config.Database, "?sslmode=", Config.Sslmode}, "")
+		DB, err = sql.Open("postgres", dsn)
+		log.Printf("%+v", DB.Stats())
+		panic(err)
+	case MYSQL:
+		dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s", Config.User, Config.Password, Config.Host, Config.Database)
+		DB, err = sql.Open("mysql", dsn)
+		if err != nil {
+			log.Println(err.Error())
+			os.Exit(3)
+		}
+		log.Printf("%+v", DB.Stats())
+		panic(err)
+	case SQLITE:
+		DB, err = sql.Open("sqlite3", Config.Database)
+		panic(err)
+	default:
+		DB, err = sql.Open("sqlite3", defaultDatabase)
+		panic(err)
+	}
 }

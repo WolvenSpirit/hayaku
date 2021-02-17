@@ -5,6 +5,9 @@ import (
 	"net/http"
 )
 
+// APIMethod type
+type APIMethod func(wr http.ResponseWriter, r *http.Request, sql string)
+
 // Method defines stadard request method types
 type Method struct {
 	GET    string
@@ -101,6 +104,7 @@ func init() {
 // Get logic for GET type request
 func handleGet(wr http.ResponseWriter, r *http.Request, sql string) {
 	wr.Write([]byte("GET"))
+	return
 }
 
 // Post logic for POST type request
@@ -118,6 +122,23 @@ func handleDelete(wr http.ResponseWriter, r *http.Request, sql string) {
 	wr.Write([]byte("DELETE"))
 }
 
+// Auth middleware
+func (s *Server) Auth(fn APIMethod) APIMethod {
+	return func(wr http.ResponseWriter, r *http.Request, sql string) {
+		// not implemented
+
+		fn(wr, r, sql)
+	}
+}
+
+// Logger middleware
+func (s *Server) Logger(fn http.HandlerFunc) http.HandlerFunc {
+	return func(wr http.ResponseWriter, r *http.Request) {
+		log.Println("Path:", r.RequestURI)
+		fn(wr, r)
+	}
+}
+
 // RegisterAPI register defined api structure
 func (s *Server) RegisterAPI() {
 	for _, v := range s.DefineAPI.API {
@@ -126,8 +147,7 @@ func (s *Server) RegisterAPI() {
 			continue
 		}
 		log.Println("Registering API path:", v.Handler.Path)
-		Mux.HandleFunc(v.Handler.Path, func(wr http.ResponseWriter, r *http.Request) {
-			log.Println("Path:", v.Handler.Path, r.RequestURI)
+		Mux.HandleFunc(v.Handler.Path, s.Logger(func(wr http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case methods.GET:
 				handleGet(wr, r, v.Handler.Methods.Get.SQL)
@@ -144,7 +164,7 @@ func (s *Server) RegisterAPI() {
 			default:
 				wr.Write([]byte("..."))
 			}
-		})
+		}))
 
 	}
 	S.HTTPserver.Handler = Mux

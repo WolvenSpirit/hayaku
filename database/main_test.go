@@ -39,7 +39,7 @@ func TestConnectPostgresql(t *testing.T) {
 					t.Error(err.Error())
 				}
 			}()
-			ConnectPostgresql()
+			Connect()
 		})
 	}
 }

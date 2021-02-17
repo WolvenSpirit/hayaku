@@ -1,0 +1,14 @@
+version: '3.3'
+
+services:
+
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: toor
+      MYSQL_DATABASE: hayaku_default
+#      MYSQL_USER: 
+#      MYSQL_PASSWORD: 
+    ports:
+      - "3306:3306"
