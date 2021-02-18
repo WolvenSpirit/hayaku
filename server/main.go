@@ -3,10 +3,12 @@ package server
 import (
 	"log"
 	"net/http"
+
+	"github.com/WolvenSpirit/hayaku/database"
 )
 
 // APIMethod type
-type APIMethod func(wr http.ResponseWriter, r *http.Request, sql string)
+type APIMethod func(wr http.ResponseWriter, r *http.Request, mData method)
 
 // Method defines stadard request method types
 type Method struct {
@@ -22,37 +24,58 @@ type contentType struct {
 	Multipart  string
 	JSON       string
 }
+
+type method interface {
+	isPublic() bool
+}
+
+func (m Get) isPublic() bool {
+	return m.Public
+}
+func (m Post) isPublic() bool {
+	return m.Public
+}
+func (m Patch) isPublic() bool {
+	return m.Public
+}
+func (m Put) isPublic() bool {
+	return m.Public
+}
+func (m Delete) isPublic() bool {
+	return m.Public
+}
+
 type ServerAPI struct {
 	API []API `yaml:"api"`
 }
 type Get struct {
 	Public   bool   `yaml:"public"`
 	SQL      string `yaml:"sql"`
-	Resource []string
+	Resource []interface{}
 	Headers  map[string]string
 }
 type Post struct {
 	Public   bool   `yaml:"public"`
 	SQL      string `yaml:"sql"`
-	Resource []string
+	Resource []interface{}
 	Headers  map[string]string
 }
 type Put struct {
 	Public   bool   `yaml:"public"`
 	SQL      string `yaml:"sql"`
-	Resource []string
+	Resource []interface{}
 	Headers  map[string]string
 }
 type Delete struct {
 	Public   bool   `yaml:"public"`
 	SQL      string `yaml:"sql"`
-	Resource []string
+	Resource []interface{}
 	Headers  map[string]string
 }
 type Patch struct {
 	Public   bool   `yaml:"public"`
 	SQL      string `yaml:"sql"`
-	Resource []string
+	Resource []interface{}
 	Headers  map[string]string
 }
 type Methods struct {
@@ -60,6 +83,7 @@ type Methods struct {
 	Post   Post   `yaml:"post"`
 	Put    Put    `yaml:"put"`
 	Delete Delete `yaml:"delete"`
+	Patch  Patch  `yaml:"patch"`
 }
 type Handler struct {
 	Path    string  `yaml:"path"`
@@ -102,32 +126,58 @@ func init() {
 }
 
 // Get logic for GET type request
-func handleGet(wr http.ResponseWriter, r *http.Request, sql string) {
+func handleGet(wr http.ResponseWriter, r *http.Request, data method) {
+	var err error
+	d := data.(Get)
+	result, err := database.DB.Query(d.SQL, d.Resource...)
+	for result.Next() {
+		// ...
+	}
 	wr.Write([]byte("GET"))
-	return
+	panic(err)
 }
 
 // Post logic for POST type request
-func handlePost(wr http.ResponseWriter, r *http.Request, sql string) {
+func handlePost(wr http.ResponseWriter, r *http.Request, data method) {
 	wr.Write([]byte("POST"))
 }
 
 // Put logic for PUT type request
-func handlePut(wr http.ResponseWriter, r *http.Request, sql string) {
+func handlePut(wr http.ResponseWriter, r *http.Request, data method) {
 	wr.Write([]byte("PUT"))
 }
 
 // Delete logic for DELETE type request
-func handleDelete(wr http.ResponseWriter, r *http.Request, sql string) {
+func handleDelete(wr http.ResponseWriter, r *http.Request, data method) {
+	wr.Write([]byte("DELETE"))
+}
+
+// Patch logic for DELETE type request
+func handlePatch(wr http.ResponseWriter, r *http.Request, data method) {
 	wr.Write([]byte("DELETE"))
 }
 
 // Auth middleware
 func (s *Server) Auth(fn APIMethod) APIMethod {
-	return func(wr http.ResponseWriter, r *http.Request, sql string) {
-		// not implemented
-
-		fn(wr, r, sql)
+	return func(wr http.ResponseWriter, r *http.Request, mData method) {
+		if !mData.isPublic() {
+			wr.WriteHeader(http.StatusForbidden)
+			wr.Write([]byte("This resource is not public"))
+			return
+		}
+		/*
+			t := reflect.TypeOf(mData)
+			switch t.Name() {
+			case "Get":
+			case "Post":
+			case "Put":
+			case "Patch":
+			case "Delete":
+			default:
+				return
+			}
+		*/
+		fn(wr, r, mData)
 	}
 }
 
@@ -135,6 +185,11 @@ func (s *Server) Auth(fn APIMethod) APIMethod {
 func (s *Server) Logger(fn http.HandlerFunc) http.HandlerFunc {
 	return func(wr http.ResponseWriter, r *http.Request) {
 		log.Println("Path:", r.RequestURI)
+		defer func() {
+			if err, ok := recover().(error); ok && err != nil {
+				log.Println(err.Error())
+			}
+		}()
 		fn(wr, r)
 	}
 }
@@ -150,17 +205,19 @@ func (s *Server) RegisterAPI() {
 		Mux.HandleFunc(v.Handler.Path, s.Logger(func(wr http.ResponseWriter, r *http.Request) {
 			switch r.Method {
 			case methods.GET:
-				handleGet(wr, r, v.Handler.Methods.Get.SQL)
+				s.Auth(handleGet)(wr, r, v.Handler.Methods.Get)
 				break
 			case methods.POST:
-				handlePost(wr, r, v.Handler.Methods.Post.SQL)
+				s.Auth(handlePost)(wr, r, v.Handler.Methods.Post)
 				break
 			case methods.PUT:
-				handlePut(wr, r, v.Handler.Methods.Put.SQL)
+				s.Auth(handlePut)(wr, r, v.Handler.Methods.Put)
 				break
 			case methods.DELETE:
-				handleDelete(wr, r, v.Handler.Methods.Delete.SQL)
+				s.Auth(handleDelete)(wr, r, v.Handler.Methods.Delete)
 				break
+			case methods.PATCH:
+				s.Auth(handlePatch)(wr, r, v.Handler.Methods.Patch)
 			default:
 				wr.Write([]byte("..."))
 			}
