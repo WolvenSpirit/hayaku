@@ -21,7 +21,7 @@ api:
           resource:
             - "username"
             - "password"
-          sql: "select username, password from products"
+          sql: "select * from users"
   - handler:
       path: "/products"
       methods:
@@ -30,7 +30,8 @@ api:
           sql: "insert (name,price) values ($1,$2)"
         get:
           public: true
-          sql: "select name, price from products"
+          sql: "select id, name, price, product_number from products"
+          contentType: "application/xml"
         put:
           public: true
           sql: ""
