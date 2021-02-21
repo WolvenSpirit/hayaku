@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/WolvenSpirit/hayaku/auth"
+	"github.com/WolvenSpirit/hayaku/cache"
 	"github.com/WolvenSpirit/hayaku/database"
 )
 
@@ -280,6 +282,15 @@ func handlePatch(wr http.ResponseWriter, r *http.Request, data method) {
 func (s *Server) Auth(fn APIMethod) APIMethod {
 	return func(wr http.ResponseWriter, r *http.Request, mData method) {
 		if !mData.isPublic() {
+			wr.WriteHeader(http.StatusForbidden)
+			wr.Write([]byte("This resource is not public"))
+			return
+		}
+		token := r.Header.Get("X-Auth-Token")
+		scmd := cache.Client.Get(token)
+		storedToken, err := scmd.Result()
+		go func() { panic(err) }()
+		if !auth.CompareHashAndPassword([]byte(storedToken), []byte(token)) {
 			wr.WriteHeader(http.StatusForbidden)
 			wr.Write([]byte("This resource is not public"))
 			return

@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/WolvenSpirit/hayaku/cache"
 	"github.com/WolvenSpirit/hayaku/database"
 	"github.com/WolvenSpirit/hayaku/server"
 	"github.com/go-yaml/yaml"
@@ -15,8 +16,9 @@ import (
 
 // Config struct
 type Config struct {
-	Host string
-	Port string
+	Host  string      `yaml:"host"`
+	Port  string      `yaml:"port"`
+	Redis cache.Redis `yaml:"redis"`
 }
 
 var (
@@ -87,6 +89,7 @@ func init() {
 	server.S.HTTPserver.Addr = fmt.Sprintf("%s:%s", Configuration.Host, Configuration.Port)
 	server.S.RegisterAPI()
 	database.Connect()
+	cache.ConnectRedis(fmt.Sprintf(Configuration.Redis.Host), Configuration.Redis.Password, Configuration.Redis.DBI)
 }
 
 func main() {
