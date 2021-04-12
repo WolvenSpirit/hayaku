@@ -1,4 +1,5 @@
 [![Actions Status](https://github.com/WolvenSpirit/hayaku/workflows/Go%20build%20&%20test%20Hayaku/badge.svg)](https://github.com/WolvenSpirit/hayaku/actions)
+[![codecov](https://codecov.io/gh/WolvenSpirit/hayaku/branch/master/graph/badge.svg?token=TLWM6G8PWU)](https://codecov.io/gh/WolvenSpirit/hayaku)
 
 ### 早く 
 ###### hayaku
