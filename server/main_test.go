@@ -2,6 +2,7 @@ package server
 
 import (
 	"database/sql"
+	"encoding/json"
 	"net/http"
 	"reflect"
 	"testing"
@@ -53,6 +54,32 @@ func Test_getResult(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := getResult(tt.args.result); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("getResult() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_jsonMarshal(t *testing.T) {
+	var st []map[string]interface{}
+	expect, _ := json.Marshal(&st)
+	type args struct {
+		result []map[string]interface{}
+	}
+	tests := []struct {
+		name string
+		args args
+		want []byte
+	}{
+		{
+			name: "",
+			args: args{result: st},
+			want: expect,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := jsonMarshal(tt.args.result); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("jsonMarshal() = %v, want %v", got, tt.want)
 			}
 		})
 	}

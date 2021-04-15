@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"io/ioutil"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -90,6 +91,22 @@ func Test_main(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			testtingMain = true
 			main()
+		})
+	}
+}
+
+func Test_parseFlags(t *testing.T) {
+	os.Args = []string{"--cfg", "", "--db", "", "--api", "", "--dev"}
+	tests := []struct {
+		name string
+	}{
+		{
+			"parse flags",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			parseFlags()
 		})
 	}
 }

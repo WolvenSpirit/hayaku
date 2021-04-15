@@ -3,10 +3,10 @@ github.com/WolvenSpirit/hayaku/main.go:38.25,39.38 1 1
 github.com/WolvenSpirit/hayaku/main.go:39.38,41.3 1 1
 github.com/WolvenSpirit/hayaku/main.go:44.19,56.30 2 1
 github.com/WolvenSpirit/hayaku/main.go:56.30,57.14 1 1
-github.com/WolvenSpirit/hayaku/main.go:58.18,59.26 1 0
-github.com/WolvenSpirit/hayaku/main.go:60.18,61.29 1 0
-github.com/WolvenSpirit/hayaku/main.go:62.17,63.31 1 0
-github.com/WolvenSpirit/hayaku/main.go:64.18,65.22 1 0
+github.com/WolvenSpirit/hayaku/main.go:58.18,59.26 1 1
+github.com/WolvenSpirit/hayaku/main.go:60.18,61.29 1 1
+github.com/WolvenSpirit/hayaku/main.go:62.17,63.31 1 1
+github.com/WolvenSpirit/hayaku/main.go:64.18,65.22 1 1
 github.com/WolvenSpirit/hayaku/main.go:70.53,72.12 2 1
 github.com/WolvenSpirit/hayaku/main.go:76.2,76.8 1 1
 github.com/WolvenSpirit/hayaku/main.go:72.12,74.13 2 1
@@ -19,5 +19,5 @@ github.com/WolvenSpirit/hayaku/main.go:102.2,105.12 4 1
 github.com/WolvenSpirit/hayaku/main.go:108.2,108.19 1 1
 github.com/WolvenSpirit/hayaku/main.go:111.2,113.52 3 1
 github.com/WolvenSpirit/hayaku/main.go:99.19,101.3 1 0
-github.com/WolvenSpirit/hayaku/main.go:105.12,107.3 1 0
+github.com/WolvenSpirit/hayaku/main.go:105.12,107.3 1 1
 github.com/WolvenSpirit/hayaku/main.go:108.19,110.3 1 0

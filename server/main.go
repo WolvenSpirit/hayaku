@@ -3,7 +3,6 @@ package server
 import (
 	"database/sql"
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	"log"
 	"net/http"
@@ -226,14 +225,6 @@ func getResult(result *sql.Rows) []map[string]interface{} {
 
 func jsonMarshal(result []map[string]interface{}) []byte {
 	b, _ := json.Marshal(&result)
-	return b
-}
-func xmlMarshal(result []map[string]interface{}) []byte {
-	o := struct {
-		Data []map[string]interface{} `xml:"data"`
-	}{result}
-	b, err := xml.Marshal(&o)
-	go func() { panic(err) }()
 	return b
 }
 
