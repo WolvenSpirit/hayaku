@@ -1,8 +1,6 @@
 package cache
 
 import (
-	"log"
-
 	"github.com/go-redis/redis"
 )
 
@@ -26,7 +24,4 @@ func ConnectRedis(host, password string, dbi int) {
 		DB:       dbi,
 	}
 	Client = redis.NewClient(opt)
-	r, err := Client.Ping().Result()
-	log.Printf("Redis connected: %+v", r)
-	panic(err)
 }
