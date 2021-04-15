@@ -31,7 +31,8 @@ var (
 	// APIfile API definition file
 	APIfile string = "api.yaml"
 	// Development run
-	Development = false
+	Development  = false
+	testtingMain = false
 )
 
 func dontPanicBeHappy() {
@@ -100,7 +101,9 @@ func main() {
 	go func() {
 		log.Println(server.S.HTTPserver.ListenAndServe())
 	}()
-	<-sig
+	if !testtingMain {
+		<-sig
+	}
 	log.Println("Shutting down server.")
 	database.DB.Close()
 	server.S.HTTPserver.Shutdown(context.Background())

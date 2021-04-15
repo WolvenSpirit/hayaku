@@ -1,11 +1,14 @@
 package main
 
 import (
+	"errors"
+	"io/ioutil"
 	"reflect"
 	"testing"
 )
 
 func Test_populateStructFromYAML(t *testing.T) {
+	b := readFile(ConfigFile)
 	type args struct {
 		data []byte
 		obj  interface{}
@@ -14,7 +17,11 @@ func Test_populateStructFromYAML(t *testing.T) {
 		name string
 		args args
 	}{
-		// TODO: Add test cases.
+		{
+			name: "Test populate config struct",
+			args: args{
+				data: b, obj: &Configuration},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -24,6 +31,7 @@ func Test_populateStructFromYAML(t *testing.T) {
 }
 
 func Test_readFile(t *testing.T) {
+	expect, _ := ioutil.ReadFile(APIfile)
 	type args struct {
 		fileName string
 	}
@@ -32,13 +40,56 @@ func Test_readFile(t *testing.T) {
 		args            args
 		wantFilebytearr []byte
 	}{
-		// TODO: Add test cases.
+		{
+			name: "read a file",
+			args: args{
+				fileName: APIfile,
+			},
+			wantFilebytearr: expect,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if gotFilebytearr := readFile(tt.args.fileName); !reflect.DeepEqual(gotFilebytearr, tt.wantFilebytearr) {
 				t.Errorf("readFile() = %v, want %v", gotFilebytearr, tt.wantFilebytearr)
 			}
+		})
+	}
+}
+
+func Test_dontPanicBeHappy(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		{
+			name: "Panic!!!",
+		},
+		{
+			name: "Don't panic!!!",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			defer dontPanicBeHappy()
+			if tt.name == "Panic!!!" {
+				panic(errors.New("Panicking!!!"))
+			}
+		})
+	}
+}
+
+func Test_main(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		{
+			name: "call main",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			testtingMain = true
+			main()
 		})
 	}
 }
