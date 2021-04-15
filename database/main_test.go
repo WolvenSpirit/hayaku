@@ -45,6 +45,7 @@ func TestConnectPostgresql(t *testing.T) {
 }
 
 func TestUp(t *testing.T) {
+	TestConfigInit(t)
 	TestDatabaseInit(t)
 	TestConfigInit(t)
 	tests := []struct {
