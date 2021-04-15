@@ -89,12 +89,16 @@ func init() {
 	populateStructFromYAML(readFile(APIfile), &server.S.DefineAPI)
 	server.S.HTTPserver.Addr = fmt.Sprintf("%s:%s", Configuration.Host, Configuration.Port)
 	server.S.RegisterAPI()
-	database.Connect()
+	if !testtingMain {
+		database.Connect()
+	}
 	cache.ConnectRedis(fmt.Sprintf(Configuration.Redis.Host), Configuration.Redis.Password, Configuration.Redis.DBI)
 }
 
 func main() {
-	database.Up()
+	if !testtingMain {
+		database.Up()
+	}
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt)
 	log.Printf("Listening on [%s] Development run [%t]", server.S.HTTPserver.Addr, Development)
