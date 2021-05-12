@@ -1,0 +1,64 @@
+syntax = "proto3";
+package hayaku;
+
+service auth {
+        rpc Register(register_request) returns (register_response);
+        rpc Login(login_request) returns (login_response);
+        rpc Verify(verify_request) returns (verify_response);
+        rpc MetricDispatcher(metrics_request) returns (stream metrics_frame);
+}
+
+message register_request {
+    string username = 1;
+    string password = 2;
+    string email = 3;
+}
+
+message register_response {
+    oneof response {
+        error fail = 1;
+        success success = 2;
+    }
+}
+
+message login_request {
+    string username = 1;
+    string password = 2;
+}
+
+message login_response {
+    oneof response {
+        error fail = 1;
+        success success = 2;
+    }
+}
+
+message verify_request {
+    string token = 1;
+}
+
+message verify_response {
+    bool allow = 1;
+    oneof response {
+        error fail = 2;
+        success success = 3;
+    }
+}
+
+message error {
+    string message = 1;
+    sint32 code = 2;
+}
+
+message success {
+    string message = 1;
+    string token = 2;
+}
+
+message metrics_request {
+    repeated string params = 1;
+}
+
+message metrics_frame {
+    string message = 1;
+}
